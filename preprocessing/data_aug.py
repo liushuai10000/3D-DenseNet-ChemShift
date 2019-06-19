@@ -49,8 +49,9 @@ def rot_aug_data(xyz_np_file, new_file_name, aug_fold=8):
         np.save(new_file_name + "_" + str(j), xyz_new)
 
         
-# hydrogen as example
+        
+# For loop version not tested. Original version is each atom type one time.
 if __name__ == '__main__':
-    atom_type = "H" # hydrogen is the example
-    rot_aug_data("train_" + atom_type + "_xyz.npy", "train_" + atom_type + "_aug_xyz")
-    rot_aug_data("test_" + atom_type + "_xyz.npy", "test_" + atom_type + "_aug_xyz")
+    for atom_type in ["H", "C", "N", "O"]:
+        rot_aug_data("train_" + atom_type + "_xyz.npy", "train_" + atom_type + "_aug_xyz")
+        rot_aug_data("test_" + atom_type + "_xyz.npy", "test_" + atom_type + "_aug_xyz")

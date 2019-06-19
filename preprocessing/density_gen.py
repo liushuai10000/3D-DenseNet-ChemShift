@@ -1,3 +1,8 @@
+"""
+Density generation accelerated by pytorch
+"""
+
+
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
@@ -242,6 +247,7 @@ def generate_density(prefix, batch_size, density_type="Gaussian", hyperparameter
             
             
             
+# For loop version not tested yet    
 if __name__ == "__main__":
     for dataset in ["train_", "test_"]:
         for atom_type in ["H", "C", "N", "O"]:

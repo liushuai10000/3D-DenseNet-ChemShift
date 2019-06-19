@@ -52,7 +52,9 @@ def json_to_numpy(json_folder, prefix, atom_type='H', k=320):
     np.save(prefix + "_y", y)
 
     
+    
+# For loop version not tested. Original version is each atom type one time.
 if __name__ == '__main__':
-    atom_type = "H" # example is hydrogen. Can be changed to carbon, nitrogen and oxygen.
-    json_to_numpy("train_json", "train_" + atom_type + "_", atom_type)
-    json_to_numpy("test_json", "test_" + atom_type + "_", atom_type)
+    for atom_type in ["H", "C", "N", "O"]:
+        json_to_numpy("train_json", "train_" + atom_type + "_", atom_type)
+        json_to_numpy("test_json", "test_" + atom_type + "_", atom_type)
