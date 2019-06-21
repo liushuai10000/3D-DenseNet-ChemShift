@@ -5,6 +5,7 @@ Shuai Liu, Jie Li, Kochise C. Bennett, Brad Ganoe, Tim Stauch, Martin Head-Gordo
 
 Dependences: wget, pytorch, tensorflow, keras
 Currently we only have scripts to train and test the model.
+
 We will upload the trained model and script to predict chemical shifts given xyz files (under construction).
 
 
@@ -58,6 +59,10 @@ We provide the following models in model directory:
 2) Two baseline DenseNets
 3) Regular CNN and ResNet with same number of 3x3x3 filters
 
+## Data Analysis Tools
+Under construction. We plan to provide the tools to:
+1) Plot the density of input, intermediate layers and weights
+2) PCA for the intermediate layers to interpret the model
 
 ## Training and Testing script
 We also provide the trainin gand testing script examples. 
