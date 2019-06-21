@@ -6,7 +6,7 @@ Shuai Liu, Jie Li, Kochise C. Bennett, Brad Ganoe, Tim Stauch, Martin Head-Gordo
 Dependences: wget, pytorch, tensorflow, keras
 Currently we only have scripts to train and test the model.
 
-We will upload the trained model and script to predict chemical shifts given xyz files (under construction).
+We will upload the trained model and easy-to-use interface to predict the chemical shift given xyz file (under construction).
 
 
 ## Data Preprocessing
