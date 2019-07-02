@@ -6,7 +6,7 @@ from keras.layers.convolutional import Convolution3D, Convolution1D, MaxPooling3
 from keras.regularizers import l2
 import tensorflow as tf
 from keras import backend as K
-
+import numpy as np
 
 
 def conv_bn_relu(x, n, s, pad, reg=3e-5, d=1):
@@ -42,3 +42,14 @@ def dense_bn_relu(x, n, d, reg=3e-5):
     x = ReLU()(x)
     x = Dropout(d)(x)
     return x
+
+def exp_decay(epoch):
+    
+    """
+    the exponential decay function, starting from 1e-3, decay rate with 0.6
+    epoch: epoch index
+    """
+    
+    initial_lrate = 1e-3
+    rate = 0.25
+    return initial_lrate * np.exp(-rate*epoch)

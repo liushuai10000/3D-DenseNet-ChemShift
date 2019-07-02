@@ -7,7 +7,7 @@ from keras.models import Model
 from keras.layers.core import Flatten, Dense
 from keras.layers import Lambda, Input, Add, Concatenate
 from keras.layers.convolutional import AveragePooling3D
-from utils import conv_bn_relu, dense_bn_relu
+from model.utils import conv_bn_relu, dense_bn_relu
 
 
 

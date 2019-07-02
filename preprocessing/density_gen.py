@@ -2,7 +2,8 @@
 Density generation accelerated by pytorch
 """
 
-
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
@@ -128,8 +129,9 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         
         diff = pos_grid - np.transpose(x,(2,0,1))
         norm = np.linalg.norm(diff, axis=-3)
-        gaussian = np.exp(- * norm * norm / sigma)
+        gaussian = np.exp(- norm * norm / sigma)
         gaussian = gaussian * np.transpose(feature, (2,0,1))
+        print(gaussian.shape)
         gaussian = np.transpose(np.sum(gaussian, axis=-1, dtype=np.float16, keepdims = False), (4,0,1,2,3))
         return gaussian
     
@@ -153,7 +155,7 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         return slater
     
     
-    def _form_factor(self, x, feature, norm_factor=100):
+    def _form_factor(x, feature, norm_factor=100):
         
         """
         Density calculated from Form Factor:
@@ -192,22 +194,22 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         """
         
     if density_type == "Gaussian":
-        return self._gaussian(x, feature, hyperparameter)
+        return _gaussian(x, feature, pos_grid, hyperparameter)
     if density_type == "Slater":
-        return self._slater(x, feature)
+        return _slater(x, pos_grid, feature)
     if density_type == "Form_Factor":
-        return self._form_factor(x, feature, hyperparameter)
+        return _form_factor(x, feature, pos_grid, hyperparameter)
     else:
         raise NotImplementedError("Density Type Not Implemented!")
 
 
 
 
-def generate_density(prefix, batch_size, density_type="Gaussian", hyperparameter=1/3):
+def generate_density(pre, batch_size, density_type="Gaussian", hyperparameter=1/3):
     
     """
     Generate the density
-    prefix: the prefix for y, points and xyz files
+    pre: the prefix for y, points and xyz files
     batch_size: depends on the GPU. Tested batch_size=32 for Tesla P100/V100
     density_type: only suppotr "Gaussian", "Slater" and "Form_Factor"
         hyperparameter: for Gaussian, it's sigma, default 1/3; for Form_Fator, it's normalizing factor

@@ -1,6 +1,7 @@
 """
 Turn json files into numpy files with xyz values, atom type and chemical shielding values into:
 prefix_xyz.npy, prefix_points.npy and prefix_y.npy
+IMPORTANT NOTE: the order of channels are H, C, O, N
 """
 import json
 import os
@@ -35,6 +36,7 @@ def json_to_numpy(json_folder, prefix, atom_type='H', k=320):
         y.append(lines[0][-1])
         xyz = []
         points = []
+        # Note: the order of channels are H, C, O and N but not H, C, N, O currently
         for l in range(1, k+1):
             xyz.append(lines[l][1:4])
             if lines[l][0] == "H":
