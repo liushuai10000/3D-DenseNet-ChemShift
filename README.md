@@ -5,7 +5,7 @@ Shuai Liu, Jie Li, Kochise C. Bennett, Brad Ganoe, Tim Stauch, Martin Head-Gordo
 
 Dependences: requests, pytorch, tensorflow, keras
 
-Currently we only have scripts to train and test the model.
+Currently we only have scripts for data preprocessing, train and test the model. We will add more interfaces to .xyz files later.
 
 We will upload the trained model and easy-to-use interface to predict the chemical shift given xyz file (under construction).
 
