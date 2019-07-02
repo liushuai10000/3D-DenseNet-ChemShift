@@ -74,5 +74,7 @@ Under the default setting, please run following command sequentially:
 
 `python test.py`
 
-Important: these two only provide examples for hydrogen. For other atom types, the file names and scale need to be changed.
+IMPORTANT: these two only provide examples for oxygen. For other atom types, the file names and scale need to be changed. Also, for hydrogen, there is a filtering process to filter out the chemical shieldings < 0 or > 40 in the training dataset. All the other dataset are not filtered.
+
+Tips: In the current setting, the atom type order is H, C, O, N and the grid size order (center to face distance): 2A, 4A, 3A, 5A, 7A. This indexing was due to that we were using 3A, 5A, 7A as a subset for ablation study. This order makes the indexing more easily. However, one can easily change the atom type order in preprocessing/json_to_numpy.py and train/test.py, respectively. 
 
