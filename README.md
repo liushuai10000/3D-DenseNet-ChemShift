@@ -53,6 +53,7 @@ Generate the density given xyz and one-hot atom type vector numpy files
 
 `python density_gen.py`
 
+Note: for the densities other than Gaussian, we simply copy our raw script into the current script without further testing.
 
 ## Models
 We provide the following models in model directory:
@@ -60,10 +61,7 @@ We provide the following models in model directory:
 2) Two baseline DenseNets
 3) Regular CNN and ResNet with same number of 3x3x3 filters
 
-## Data Analysis Tools
-Under construction. We plan to provide the tools to:
-1) Plot the density of input, intermediate layers and weights
-2) PCA for the intermediate layers to interpret the model
+Note: same as other densities, we only tested 1). 2) and 3) are not extensively tested in the current script.
 
 ## Training and Testing script
 We also provide the trainin gand testing script examples. 
