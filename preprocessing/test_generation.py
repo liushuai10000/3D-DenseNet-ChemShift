@@ -150,7 +150,8 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         zeta = z * feature
         slater = r * np.exp(- np.transpose(zeta, (2,0,1)) * norm)
         slater = slater * np.transpose(feature, (2,0,1))
-        slater = np.transpose(np.sum(slater, axis=-1, dtype=np.float16, keepdims = False), (4,0,1,2,3))
+        slater = np.sum(slater, axis=-1)
+        slater = np.transpose(slater, (4,0,1,2,3))
         return slater
     
     
@@ -178,7 +179,8 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
              + a3 * np.sqrt(b3) * np.exp(- b3 * norm * norm)\
              + a4 * np.sqrt(b4) * np.exp(- b4 * norm * norm)
         ff = ff * np.transpose(feature, (2,0,1)) / norm_factor
-        ff = np.transpose(np.sum(ff, axis=-1, dtype=np.float16, keepdims = False), (4,0,1,2,3))
+        ff = np.sum(ff, axis=-1)
+        ff = np.transpose(ff, (4,0,1,2,3))
         return ff
         
             
@@ -247,12 +249,12 @@ def generate_density(pre, batch_size, density_type="Gaussian", hyperparameter=1/
                                              density_type,
                                              hyperparameter))
             gaussian = np.concatenate(gaussian)
-            np.save(pre + "_x_" + str(l) + "A_" + str(idx), gaussian)
+            np.save(density_type + "_x_" + str(l) + "A_" + str(idx), gaussian)
             
             
 # For loop version not tested yet    
 if __name__ == "__main__":
-    for dataset in ["train_", "test_"]:
-        for atom_type in ["H", "C", "N", "O"]:
-            generate_density(dataset + atom_type, 32)
+    for dataset in ["test_"]:
+        for atom_type in ["H"]:
+            generate_density(dataset + atom_type, 32, "Form_Factor")
     
