@@ -17,7 +17,7 @@ data_dir = "preprocessing/"
 train_y = np.load(data_dir + "train_O_y.npy")
 size = train_y.shape[0]
 m = np.mean(train_y) # substract the mean during training
-num_aug_fold = 1 # min 1 max 8
+num_aug_fold = 8 # min 1 max 8
 scale = 40 # scale the std of different atom type to encourage convergence
 train_y = np.concatenate([train_y for _ in range(num_aug_fold)]) # because it's augmented
 train_x = np.zeros((size*num_aug_fold, 16, 16, 16, 20), dtype=np.float16) # generate the tensor first
