@@ -30,7 +30,7 @@ class ProcessNet(nn.Module):
         
         super(ProcessNet, self).__init__()
         self.pos_grid = torch.from_numpy(pos_grid).float().cuda()
-        self.z = torch.tensor([1, 3.14, 3.83, 4.45]).float().cuda()
+        self.z = torch.tensor([1, 3.14, 3.83, 4.45]).float().cuda().view(4,1,1)
         self.a1 = torch.tensor([0.489918, 2.31, 12.2126, 3.0485]).float().cuda().view(4,1,1) # normalize
         self.b1 = 1 / torch.tensor([20.6593, 20.8439, 0.0057, 13.2771]).float().cuda().view(4,1,1) * 39.44
         self.a2 = torch.tensor([0.262003, 1.02, 3.1322, 2.2868]).float().cuda().view(4,1,1)
@@ -47,11 +47,11 @@ class ProcessNet(nn.Module):
         Gaussian density: D(x)=exp(-(x-x_a)^2/sigma) without normalizing factor
         """
         
-        diff = self.pos_grid - x.permute(2,0,1) # [#dimension, batch_size, #atoms]
+        diff = self.pos_grid - x.permute(2,0,1) # [16, 16, 16, #num_atype_type, #dimension, batch_size, #atoms]
         norm = torch.norm(diff, dim=-3)
         gaussian = torch.exp(- norm * norm / sigma)
-        gaussian = gaussian * feature.permute(2,0,1)
-        gaussian = torch.sum(gaussian, dim=-1).permute(4,0,1,2,3)
+        gaussian = gaussian * feature.permute(2,0,1) # [16, 16, 16, #num_atype_type, batch_size, #atoms]
+        gaussian = torch.sum(gaussian, dim=-1).permute(4,0,1,2,3) # [batch_size, 16, 16, 16, #num_atype_type]
         return gaussian
     
     
@@ -61,12 +61,11 @@ class ProcessNet(nn.Module):
         Slater density: D(x)=r^(n-1)exp(-\zeta*r) without normalizing factor
         """
         
-        diff = self.pos_grid - x.permute(2,0,1)
-        norm = torch.norm(diff, dim=-3)
-        r = norm
-        r[:,:,:,:,:,0] = 1
-        zeta = self.z * feature
-        slater = r * torch.exp(- zeta.permute(2,0,1) * norm)
+        diff = self.pos_grid - x.permute(2,0,1) #[16, 16, 16, #num_atype_type, #dimension, batch_size, #atoms]
+        norm = torch.norm(diff, dim=-3) #[16, 16, 16, #num_atype_type, batch_size, #atoms]
+        r = norm.clone().detach()
+        r[:,:,:,0] = 1
+        slater = r * torch.exp(- self.z * norm)
         slater = slater * feature.permute(2,0,1)
         slater = torch.sum(slater, dim=-1).permute(4,0,1,2,3)
         return slater
@@ -76,7 +75,7 @@ class ProcessNet(nn.Module):
         
         """
         Density calculated from Form Factor:
-        D(x)=\sum_{i=1}^4 \sqrt{b_i}*exp(-b_i*norm^2)
+        D(x)=\sum_{i=1}^4 a_i\sqrt{b_i}*exp(-b_i*norm^2)
         IMPORTANT: b_i is scaled, please refer __init__ function
         Normalized with 100 in denominator, can be tuned.
         """
@@ -131,7 +130,6 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         norm = np.linalg.norm(diff, axis=-3)
         gaussian = np.exp(- norm * norm / sigma)
         gaussian = gaussian * np.transpose(feature, (2,0,1))
-        print(gaussian.shape)
         gaussian = np.transpose(np.sum(gaussian, axis=-1, dtype=np.float16, keepdims = False), (4,0,1,2,3))
         return gaussian
     
@@ -142,13 +140,12 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         Slater density: D(x)=r^(n-1)exp(-\zeta*r) without normalizing factor
         """
         
-        z = np.array([1, 3.14, 3.83, 4.45])
+        z = np.array([1, 3.14, 3.83, 4.45]).reshape((4,1,1))
         diff = pos_grid - np.transpose(x,(2,0,1))
         norm = np.linalg.norm(diff, axis=-3)
-        r = norm
-        r[:,:,:,:,:,0] = 1
-        zeta = z * feature
-        slater = r * np.exp(- np.transpose(zeta, (2,0,1)) * norm)
+        r = np.array(norm)
+        r[:,:,:,0] = 1
+        slater = r * np.exp(- z * norm)
         slater = slater * np.transpose(feature, (2,0,1))
         slater = np.transpose(np.sum(slater, axis=-1, dtype=np.float16, keepdims = False), (4,0,1,2,3))
         return slater
