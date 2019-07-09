@@ -15,10 +15,10 @@ def k_nearest_atom(folder, config_x, config_y, config_z, atoms, k=320, rep_num=3
     """
     Query k nearest atoms from the xyz file and write into json files by extending the current unit cell.
     input: folder, the destination path of the json file
-           config_x, config_y, config_z, the a, b, c values of the unit cell
-           atoms, a list with each element as [atom_type, x, y, z, shift]
+           config_x, config_y, config_z, the a, b, c vectors of the unit cell
+           atoms, a list with each element as [atom_type, x, y, z, DFT_shift]
            k: number of nearest atoms. default is 320
-           rep_num: repeat units along x, y and z direction by periodic boundary condition.
+           rep_num: repeat units along a, b and c direction.
                     IMPORTANT: this is based on the assumption that the unit cell is at least 2.3A on each dimension.
                     This is true based on van der waals distance between atoms in this dataset. 
                     However, if this is applied to other dataset, this number possibly needs to be adjusted.
