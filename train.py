@@ -1,5 +1,6 @@
 """
 The training script: an example for oxygen
+Please make sure to filter the training data for hydrogen.
 """
 
 import os
