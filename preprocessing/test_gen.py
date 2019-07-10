@@ -30,16 +30,15 @@ class ProcessNet(nn.Module):
         
         super(ProcessNet, self).__init__()
         self.pos_grid = torch.from_numpy(pos_grid).float().cuda()
-        self.z = torch.tensor([1, 3.14, 4.45, 3.83]).float().cuda().view(4,1,1) # 0rder H, C, O, N
-        self.slater_normalizer = torch.tensor([2, 20.17, 48.24, 33.15]).float().cuda()
-        self.a1 = torch.tensor([0.489918, 2.31, 3.0485, 12.2126]).float().cuda().view(4,1,1) # normalize
-        self.b1 = 1 / torch.tensor([20.6593, 20.8439, 13.2771, 0.0057]).float().cuda().view(4,1,1) * 39.44
-        self.a2 = torch.tensor([0.262003, 1.02, 2.2868, 3.1322]).float().cuda().view(4,1,1)
-        self.b2 = 1 / torch.tensor([7.74039, 10.2075, 5.7011, 9.8933]).float().cuda().view(4,1,1) * 39.44
-        self.a3 = torch.tensor([0.196767, 1.5886, 1.5463, 2.0125]).float().cuda().view(4,1,1)
-        self.b3 = 1 / torch.tensor([49.5519, 0.5687, 0.3239, 28.9975]).float().cuda().view(4,1,1) * 39.44
-        self.a4 = torch.tensor([0.049879, 0.865, 0.867, 1.1663]).float().cuda().view(4,1,1)
-        self.b4 = 1 / torch.tensor([2.20159, 51.6512, 32.9089, 0.5826]).float().cuda().view(4,1,1) * 39.44
+        self.z = torch.tensor([1, 3.14, 3.83, 4.45]).float().cuda().view(4,1,1)
+        self.a1 = torch.tensor([0.489918, 2.31, 12.2126, 3.0485]).float().cuda().view(4,1,1) # normalize
+        self.b1 = 1 / torch.tensor([20.6593, 20.8439, 0.0057, 13.2771]).float().cuda().view(4,1,1) * 39.44
+        self.a2 = torch.tensor([0.262003, 1.02, 3.1322, 2.2868]).float().cuda().view(4,1,1)
+        self.b2 = 1 / torch.tensor([7.74039, 10.2075, 9.8933, 5.7011]).float().cuda().view(4,1,1) * 39.44
+        self.a3 = torch.tensor([0.196767, 1.5886, 2.0125, 1.5463]).float().cuda().view(4,1,1)
+        self.b3 = 1 / torch.tensor([49.5519, 0.5687, 28.9975, 0.3239]).float().cuda().view(4,1,1) * 39.44
+        self.a4 = torch.tensor([0.049879, 0.865, 1.1663, 0.867]).float().cuda().view(4,1,1)
+        self.b4 = 1 / torch.tensor([2.20159, 51.6512, 0.5826, 32.9089]).float().cuda().view(4,1,1) * 39.44
         
         
     def _gaussian(self, x, feature, sigma=1/3):
@@ -69,7 +68,6 @@ class ProcessNet(nn.Module):
         slater = r * torch.exp(- self.z * norm)
         slater = slater * feature.permute(2,0,1)
         slater = torch.sum(slater, dim=-1).permute(4,0,1,2,3)
-        slater = slater * self.slater_normalizer
         return slater
     
     
@@ -78,7 +76,7 @@ class ProcessNet(nn.Module):
         """
         Density calculated from Form Factor:
         D(x)=\sum_{i=1}^4 a_i\sqrt{b_i}*exp(-b_i*norm^2)
-        IMPORTANT: b_i is scaled and have changed to 1/b_i, please refer __init__ function
+        IMPORTANT: b_i is scaled, please refer __init__ function
         Normalized with 100 in denominator, can be tuned.
         """
         
@@ -143,7 +141,6 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         """
         
         z = np.array([1, 3.14, 3.83, 4.45]).reshape((4,1,1))
-        slater_normalizer = np.array([2, 20.17, 33.15, 48.24])
         diff = pos_grid - np.transpose(x,(2,0,1))
         norm = np.linalg.norm(diff, axis=-3)
         r = np.array(norm)
@@ -151,7 +148,7 @@ def density_calc(x, feature, pos_grid, density_type="Gaussian", hyperparameter=1
         slater = r * np.exp(- z * norm)
         slater = slater * np.transpose(feature, (2,0,1))
         slater = np.transpose(np.sum(slater, axis=-1, dtype=np.float16, keepdims = False), (4,0,1,2,3))
-        return slater * slater_normalizer
+        return slater
     
     
     def _form_factor(x, feature, pos_grid, norm_factor=100):
@@ -247,12 +244,13 @@ def generate_density(pre, batch_size, density_type="Gaussian", hyperparameter=1/
                                              density_type,
                                              hyperparameter))
             gaussian = np.concatenate(gaussian)
-            np.save(pre + "_x_" + str(l) + "A_" + str(idx), gaussian)
+            np.save(density_type + "_x_" + str(l) + "A_" + str(idx), gaussian)
             
             
 # For loop version not tested yet    
 if __name__ == "__main__":
-    for dataset in ["train_", "test_"]:
-        for atom_type in ["H", "C", "N", "O"]:
-            generate_density(dataset + atom_type, 32)
+    for dataset in ["test_"]:
+        for atom_type in ["H"]:
+            generate_density(dataset + atom_type, 32, "Slater")
+            generate_density(dataset + atom_type, 32, "Form_Factor")
     

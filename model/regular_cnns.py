@@ -23,17 +23,13 @@ def cnn_3d(num_channel):
     inp = Input((16, 16, 16, num_channel))
     # first block
     x = conv_bn_relu(inp, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
+    for _ in range(4):
+        x = conv_bn_relu(x, 64, 3, "same")
     x = AveragePooling3D(2)(x)
     
     # second block
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
+    for _ in range(4):
+        x = conv_bn_relu(x, 64, 3, "same")
     x = AveragePooling3D(2)(x)
     
     # final block
@@ -58,19 +54,15 @@ def res_net_3d(num_channel):
     # first block
     x = conv_bn_relu(inp, 64, 3, "same")
     x1 = x
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
+    for _ in range(4):
+        x = conv_bn_relu(x, 64, 3, "same")
     x = Add()([x, x1])
     x = AveragePooling3D(2)(x)
     
     # second block
     x1 = x
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
-    x = conv_bn_relu(x, 64, 3, "same")
+    for _ in range(4):
+        x = conv_bn_relu(x, 64, 3, "same")
     x = Add()([x, x1])
     x = AveragePooling3D(2)(x)
     

@@ -71,9 +71,10 @@ def densenet_baseline_1(num_channel):
 def densenet_baseline_2(num_channel):
     
     """
-    The baseline (regular) DenseNet with two DenseNet blocks
+    The stronger baseline (regular) DenseNet with two DenseNet blocks
     Each block has 4 small conv_bn_relu blocks
     At the end of each block, there are two 1x1x1 convolution layers to have similar number of parameters as MR-3D-DenseNet
+    No siginificant difference observed in comparison to baseline_1
     num_channel: number of channels
     """
     
@@ -198,3 +199,88 @@ def mr_densenet(num_channel):
     y = Dense(1)(x)
     return Model(inp, y)
 
+def mr_densenet_with_flow(num_channel):
+    
+    """
+    The MR-DenseNet with two DenseNet blocks. This implementation is exactly the same as original DenseNet.
+    Each block has 4 small conv_bn_relu blocks
+    At the end of each block, we concatenate the center segment of the pooling layer
+    num_channel: number of channels
+    """
+    
+    # input layer
+    inp = Input((16,16,16,num_channel))
+    # first transition layer
+    x = conv_bn_relu(inp, 64, 3, "same")
+    # first block
+    for _ in range(4):
+        x1 = conv_bn_relu(x, 256, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 3, "same")
+        x = Concatenate()([x, x1])
+    x1 = AveragePooling3D(2)(x)
+    x2 = Lambda(lambda x: x[:,4:-4,4:-4,4:-4])(x)
+    x = Concatenate()([x1, x2])
+    
+    # second transition layer
+    x = conv_bn_relu(x, 256, 1, "same")
+    x = conv_bn_relu(x, 64, 1, "same")
+    # first block
+    for _ in range(4):
+        x1 = conv_bn_relu(x, 256, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 3, "same")
+        x = Concatenate()([x, x1])
+    x1 = AveragePooling3D(2)(x)
+    x2 = Lambda(lambda x: x[:,2:-2,2:-2,2:-2])(x)
+    x = Concatenate()([x1, x2])
+    
+    # final transition layer
+    x = conv_bn_relu(x, 256, 1, "same")
+    x = conv_bn_relu(x, 64, 1, "same")
+    x = Flatten()(x)
+    x = dense_bn_relu(x, 256, 0.1)
+    x = dense_bn_relu(x, 128, 0.1)
+    y = Dense(1)(x)
+    return Model(inp, y)
+
+def baseline_densenet_with_flow(num_channel):
+    
+    """
+    The regular DenseNet with two DenseNet blocks. This implementation is exactly the same as original DenseNet.
+    Each block has 4 small conv_bn_relu blocks
+    At the end of each block, we concatenate the center segment of the pooling layer
+    num_channel: number of channels
+    """
+    
+    # input layer
+    inp = Input((16,16,16,num_channel))
+    # first transition layer
+    x = conv_bn_relu(inp, 64, 3, "same")
+    # first block
+    for _ in range(4):
+        x1 = conv_bn_relu(x, 256, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 3, "same")
+        x = Concatenate()([x, x1])
+    x = AveragePooling3D(2)(x)
+    
+    # second transition layer
+    x = conv_bn_relu(x, 256, 1, "same")
+    x = conv_bn_relu(x, 64, 1, "same")
+    # first block
+    for _ in range(4):
+        x1 = conv_bn_relu(x, 256, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 1, "same")
+        x1 = conv_bn_relu(x1, 64, 3, "same")
+        x = Concatenate()([x, x1])
+    x = AveragePooling3D(2)(x)
+    
+    # final transition layer
+    x = conv_bn_relu(x, 256, 1, "same")
+    x = conv_bn_relu(x, 64, 1, "same")
+    x = Flatten()(x)
+    x = dense_bn_relu(x, 256, 0.1)
+    x = dense_bn_relu(x, 128, 0.1)
+    y = Dense(1)(x)
+    return Model(inp, y)
